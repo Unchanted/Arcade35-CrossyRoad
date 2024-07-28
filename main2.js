@@ -304,3 +304,105 @@ function main(){
        
        
     }
+
+   //generates a strip of grass with trees 
+   class grass{
+       
+       
+       constructor(x){
+               const green = new THREE.Mesh(
+                 new THREE.BoxGeometry(800,10,80,1), 
+                 new THREE.MeshLambertMaterial({color: 'green'})
+            );
+
+            const out = new THREE.Mesh(
+                new THREE.BoxGeometry(2000,10,80,1),
+                new THREE.MeshLambertMaterial({color: 'darkgreen'})
+            );
+
+            //number of trees in one strip
+            var treeCount = Math.floor((Math.random() * 3) + 1);
+           //number of trees total
+            var treeNumber = 0;
+            treeMatrix[x] = [];
+            let innerArray = [];
+
+            for(treeCount; treeCount >0; treeCount--){
+
+                var treeGrid =Math.floor((Math.random()*8) + 1);
+                if(treeCount % 3 ==0){
+                   innerArray.push(this.tree((400 - treeGrid*100),x*80)); 
+                }
+                else{
+                   innerArray.push(this.tree((-400 + treeGrid*100),x*80));
+                } 
+
+            }
+            treeMatrix[x].push(innerArray);
+
+            green.position.set(0,0,x*80);
+            out.position.set(0,-1,x*80);
+            scene.add(out);
+            scene.add(green);
+       }
+       // function that creates trees -- made up of a trunk and a leaf
+       tree(x,z){
+                const treeMesh = new THREE.Group();
+
+                const trunk = new THREE.Mesh(
+                    new THREE.CubeGeometry(25,60,25),
+                    new THREE.MeshLambertMaterial({color: 0x9A6169})
+                ); 
+                trunk.position.set(x,10, z);
+                trunk.castShadow = true;
+                trunk.receiveShadow = true;
+                treeMesh.add(trunk);
+
+                const leaf = new THREE.Mesh(
+                    new THREE.CubeGeometry(50,50,50,2,2,2),
+                     new THREE.MeshLambertMaterial({wireframe: false, color: 'lightgreen'})
+                );
+                leaf.position.set(x,50,z);
+                leaf.castShadow = true;
+                leaf.receiveShadow = true;
+                treeMesh.add(leaf);
+
+                const cage = new THREE.Mesh(
+                    new THREE.CubeGeometry(70,80,70,5,5,5),
+                    new THREE.MeshLambertMaterial({wireframe: true, visible:false})
+                );
+                cage.position.set(x,50,z);
+                treeMesh.add(cage);
+                scene.add(cage);
+
+                scene.add(treeMesh);
+                return cage;
+
+            }
+        
+   }
+
+
+        
+        //animation loop for the trucks
+    function truckAnimate(){
+
+           function truckTween(x,time){
+                    var start = {x: 700}; 
+                    var end =   {x: -700};
+                    var truckForward = new TWEEN.Tween(start)
+                    .to(end,time)
+                    .repeat(Infinity)
+                    .start();
+
+                truckForward.onUpdate(function(){
+                    trucksArray[x].position.x = start.x;
+                }); 
+            }
+
+            for(let i = 0; i < trucksArray.length; i++){    
+                var rand = Math.floor(Math.random()*(8000-5000+1)+5000);
+                truckTween(i, rand);
+
+            }
+        }
