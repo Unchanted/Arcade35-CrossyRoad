@@ -433,34 +433,75 @@ function main(){
         }
 
     
-    //function that creates the character the player 
-    function playerObject(){
-            
-                var textureLoader = new THREE.TextureLoader();
-                
-                player = new  THREE.Mesh(
-                    new THREE.BoxGeometry(30,30,50,50,50,50),
-                    //new THREE.MeshLambertMaterial({visible : true, color: 'gray', wireframe: true})
-                    new THREE.MeshLambertMaterial({map: textureLoader.load('cow.jpg')})
-                );   
-        
-        
-                player.position.set(0,20,-160);
-                player.name = 'player';
-                player.castShadow = true;
-                player.receiveShadow = true;
-                scene.add(player);
-                return player;
+// Function to create the character the player
+function createPlayer() {
+    const textureLoader = new THREE.TextureLoader();
+    const player = new THREE.Mesh(
+        new THREE.BoxGeometry(30, 30, 50, 50, 50, 50),
+        new THREE.MeshLambertMaterial({ map: textureLoader.load('cow.jpg') })
+    );
+
+    player.position.set(0, 20, -160);
+    player.name = 'player';
+    player.castShadow = true;
+    player.receiveShadow = true;
+    scene.add(player);
+    return player;
+}
+
+// Player movement animation function (right)
+function moveRight() {
+    const playerPosition = new THREE.Vector3();
+    playerPosition.setFromMatrixPosition(player.matrixWorld);
+
+    const start = { x: playerPosition.x, y: 0, z: playerPosition.z };
+    const end = { x: playerPosition.x - 80, y: 0, z: playerPosition.z };
+    const tweenR = new TWEEN.Tween(start)
+        .to(end, 150)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
+
+    let collisionDetected = false;
+    done = false;
+
+    tweenR.onUpdate(() => {
+        const zIndex = Math.floor(start.z / 80);
+        if (zIndex >= 0 && lanes[zIndex] === 'grass') {
+            collisionDetected = checkForCollision(zIndex, end.x);
+            if (!collisionDetected) {
+                player.position.x = start.x;
+            }
+        } else {
+            player.position.x = start.x;
+        }
+    });
+
+    tweenR.onComplete(() => {
+        done = true;
+    });
+}
+
+// Helper function to check for collision with trees
+function checkForCollision(zIndex, targetX) {
+    for (const tree of treeMatrix[zIndex][0]) {
+        if (Math.abs(targetX - tree.position.x) < 50) {
+            tweenR.stop();
+            done = true;
+            return true;
+        }
     }
-    
-    // player movement animation functions below (right, left, up, and back)
-    function right(){
-                var playerPosition = new THREE.Vector3();
+    return false;
+}
+
+ function left(){
+                let playerPosition = new THREE.Vector3();
                 playerPosition.setFromMatrixPosition(player.matrixWorld);
 
-                var start = {x:playerPosition.x, y:0, z:playerPosition.z};
-                var end = {x : (playerPosition.x-80), y:0, z:playerPosition.z};
-                var tweenR = new TWEEN.Tween(start)
+
+                let start = {x:playerPosition.x, y:0, z:playerPosition.z};
+                let end = {x : (playerPosition.x+80), y:10, z:playerPosition.z};
+                //let end = {x : fakePosition.x, y: 0, z :0};
+                let tweenL = new TWEEN.Tween(start)
                 .to(end, 150)
                 .easing(TWEEN.Easing.Quadratic.Out)
                 .start();
@@ -468,36 +509,93 @@ function main(){
                 var bool = false;
                 done = false;
 
-                tweenR.onUpdate(function(){
-                    let z = start.z / 80;        
-                    if(z >= 0){
-                            if(lanes[z] === 'grass'){
-                                for(let i = 0; i < treeMatrix[z][0].length; i++){
-                                    if(Math.abs(end.x - treeMatrix[z][0][i].position.x) < 50){
-                                        tweenR.stop();
-                                        bool = true;
-                                        done = true;
-                                    }
-
-                                } 
-                                if(!bool){
-                                    player.position.x = start.x; 
+                tweenL.onUpdate(function(){
+                    let z = start.z / 80;
+                     if(z >= 0){
+                         if(lanes[z] === 'grass'){
+                            for(let i = 0; i < treeMatrix[z][0].length; i++){
+                                if(Math.abs(end.x - treeMatrix[z][0][i].position.x) < 50){
+                                    tweenL.stop();
+                                    bool = true;
+                                    done = true;
                                 }
-                            }
-                            else{
-                                player.position.x = start.x;
+
+                            } 
+                            if(!bool){
+                                player.position.x = start.x; 
                             }
                         }
                         else{
                             player.position.x = start.x;
                         }
 
+                     }
+                     else{
+                         player.position.x = start.x;
+                     }
 
                 });
 
-                tweenR.onComplete(function(){
+               tweenL.onComplete(function(){
+                   done = true;
+               });
+            }
+
+    function up(){
+                var playerPosition = new THREE.Vector3();
+                playerPosition.setFromMatrixPosition(player.matrixWorld);
+
+                var camStart = {x:0, y:300, z:(playerPosition.z - 200)};
+                var camEnd = {x :0, y:300, z:(playerPosition.z - 180)};
+                var tweenCam = new TWEEN.Tween(camStart)
+                .to(camEnd, 2000)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
+
+                var start = {x:playerPosition.x, y:0, z:playerPosition.z};
+                var end = {x :playerPosition.x, y:0, z:(playerPosition.z + 80)};
+                var tweenUp = new TWEEN.Tween(start)
+                .to(end, 150)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
+
+                var bool = false;
+                done = false;
+                let camStop = 0;
+
+
+                tweenUp.onUpdate(function(){
+                    let z = end.z / 80;
+                    if(z >= 0){
+                        if(lanes[z] === 'grass'){
+                            for(let i = 0; i < treeMatrix[z][0].length; i++){
+                                if(Math.abs(end.x - treeMatrix[z][0][i].position.x) < 50){
+                                    tweenUp.stop();
+                                    //tweenCam.stop();
+                                    bool = true;
+                                    done = true;
+                                }
+
+                            } 
+                            if(!bool){
+                                player.position.z = start.z; 
+                            }
+                        }
+                        else{
+                            player.position.z = start.z;
+                        }
+                    }
+                    else{
+                       player.position.z = start.z;
+                    }            
+                });
+
+                 tweenCam.onUpdate(function(){
+                        camera.position.z = camStart.z; 
+                });
+
+                tweenUp.onComplete(function(){
                     done = true;
                 });
-             
 
             }
