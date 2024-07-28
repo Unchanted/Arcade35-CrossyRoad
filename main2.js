@@ -432,68 +432,78 @@ function main(){
 
         }
 
-    
-// Function to create the character the player
-function createPlayer() {
-    const textureLoader = new THREE.TextureLoader();
-    const player = new THREE.Mesh(
-        new THREE.BoxGeometry(30, 30, 50, 50, 50, 50),
-        new THREE.MeshLambertMaterial({ map: textureLoader.load('cow.jpg') })
-    );
-
-    player.position.set(0, 20, -160);
-    player.name = 'player';
-    player.castShadow = true;
-    player.receiveShadow = true;
-    scene.add(player);
-    return player;
-}
-
-// Player movement animation function (right)
-function moveRight() {
-    const playerPosition = new THREE.Vector3();
-    playerPosition.setFromMatrixPosition(player.matrixWorld);
-
-    const start = { x: playerPosition.x, y: 0, z: playerPosition.z };
-    const end = { x: playerPosition.x - 80, y: 0, z: playerPosition.z };
-    const tweenR = new TWEEN.Tween(start)
-        .to(end, 150)
-        .easing(TWEEN.Easing.Quadratic.Out)
-        .start();
-
-    let collisionDetected = false;
-    done = false;
-
-    tweenR.onUpdate(() => {
-        const zIndex = Math.floor(start.z / 80);
-        if (zIndex >= 0 && lanes[zIndex] === 'grass') {
-            collisionDetected = checkForCollision(zIndex, end.x);
-            if (!collisionDetected) {
-                player.position.x = start.x;
-            }
-        } else {
-            player.position.x = start.x;
-        }
-    });
-
-    tweenR.onComplete(() => {
-        done = true;
-    });
-}
-
-// Helper function to check for collision with trees
-function checkForCollision(zIndex, targetX) {
-    for (const tree of treeMatrix[zIndex][0]) {
-        if (Math.abs(targetX - tree.position.x) < 50) {
-            tweenR.stop();
-            done = true;
-            return true;
-        }
+ //function that creates the character the player 
+    function playerObject(){
+            
+                var textureLoader = new THREE.TextureLoader();
+                
+                player = new  THREE.Mesh(
+                    new THREE.BoxGeometry(30,30,50,50,50,50),
+                    //new THREE.MeshLambertMaterial({visible : true, color: 'gray', wireframe: true})
+                    new THREE.MeshLambertMaterial({map: textureLoader.load('cow.jpg')})
+                );   
+        
+        
+                player.position.set(0,20,-160);
+                player.name = 'player';
+                player.castShadow = true;
+                player.receiveShadow = true;
+                scene.add(player);
+                return player;
     }
-    return false;
-}
+    
+    // player movement animation functions below (right, left, up, and back)
+    function right(){
+                var playerPosition = new THREE.Vector3();
+                playerPosition.setFromMatrixPosition(player.matrixWorld);
 
- function left(){
+                var start = {x:playerPosition.x, y:0, z:playerPosition.z};
+                var end = {x : (playerPosition.x-80), y:0, z:playerPosition.z};
+                var tweenR = new TWEEN.Tween(start)
+                .to(end, 150)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
+
+                var bool = false;
+                done = false;
+
+                tweenR.onUpdate(function(){
+                    let z = start.z / 80;        
+                    if(z >= 0){
+                            if(lanes[z] === 'grass'){
+                                for(let i = 0; i < treeMatrix[z][0].length; i++){
+                                    if(Math.abs(end.x - treeMatrix[z][0][i].position.x) < 50){
+                                        tweenR.stop();
+                                        bool = true;
+                                        done = true;
+                                    }
+
+                                } 
+                                if(!bool){
+                                    player.position.x = start.x; 
+                                }
+                            }
+                            else{
+                                player.position.x = start.x;
+                            }
+                        }
+                        else{
+                            player.position.x = start.x;
+                        }
+
+
+                });
+
+                tweenR.onComplete(function(){
+                    done = true;
+                });
+             
+
+            }
+
+
+
+    function left(){
                 let playerPosition = new THREE.Vector3();
                 playerPosition.setFromMatrixPosition(player.matrixWorld);
 
@@ -597,5 +607,66 @@ function checkForCollision(zIndex, targetX) {
                 tweenUp.onComplete(function(){
                     done = true;
                 });
+
+            }
+
+    function  back(){
+                var playerPosition = new THREE.Vector3();
+                playerPosition.setFromMatrixPosition(player.matrixWorld);
+
+
+                var start = {x:playerPosition.x, y:0, z:playerPosition.z};
+                var end = {x :playerPosition.x, y:0, z:(playerPosition.z - 80)};
+                var tweenBack = new TWEEN.Tween(start)
+                .to(end,150)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
+
+                var camStart = {x:0, y:300, z:(playerPosition.z - 180)};
+                var camEnd = {x :0, y:300, z:(playerPosition.z - 200)};
+                var tweenCamera = new TWEEN.Tween(camStart)
+                .to(camEnd, 5000)
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .start();
+
+                var bool = false;
+                done = false;
+
+                tweenBack.onUpdate(function(){
+                        let z = end.z / 80;
+                         if(z >= 0){
+                             if(lanes[z] === 'grass'){
+                                for(let i = 0; i < treeMatrix[z][0].length; i++){
+                                    if(Math.abs(end.x - treeMatrix[z][0][i].position.x) < 50){
+                                        tweenBack.stop();
+                                        bool = true;
+                                        done = true;
+                                    }
+
+                                } 
+                                if(!bool){
+                                    player.position.z = start.z; 
+                                }
+                            }
+                            else{
+                                player.position.z = start.z;
+                            }
+                         }
+                        else{
+                                player.position.z = start.z;
+                        }           
+                });
+
+                tweenCamera.onUpdate(function(){
+                    //if(!bool){
+                        camera.position.z = camStart.z;
+                    //}
+                });
+
+                tweenBack.onComplete(function(){
+                    done = true;
+                });
+
+
 
             }
