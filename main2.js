@@ -406,3 +406,98 @@ function main(){
 
             }
         }
+
+ // animation loop for the cars    
+    function  carAnimate(){
+      
+            function carTween(x,time){
+                    var start = {x: -600}; 
+                    var end =   {x: 600};
+                    var carForward = new TWEEN.Tween(start)
+                    .to(end,time)
+                    .repeat(Infinity)
+                    .start();
+
+                carForward.onUpdate(function(){
+                    carsArray[x].position.x = start.x;
+                }); 
+            }
+
+            for(let i = 0; i < carsArray.length; i++){    
+                var rand = Math.floor(Math.random()*(5000-1000+1)+1000);
+                carTween(i, rand);
+
+            }
+
+
+        }
+
+    
+    //function that creates the character the player 
+    function playerObject(){
+            
+                var textureLoader = new THREE.TextureLoader();
+                
+                player = new  THREE.Mesh(
+                    new THREE.BoxGeometry(30,30,50,50,50,50),
+                    //new THREE.MeshLambertMaterial({visible : true, color: 'gray', wireframe: true})
+                    new THREE.MeshLambertMaterial({map: textureLoader.load('cow.jpg')})
+                );   
+        
+        
+                player.position.set(0,20,-160);
+                player.name = 'player';
+                player.castShadow = true;
+                player.receiveShadow = true;
+                scene.add(player);
+                return player;
+    }
+    
+    // player movement animation functions below (right, left, up, and back)
+    function right(){
+                var playerPosition = new THREE.Vector3();
+                playerPosition.setFromMatrixPosition(player.matrixWorld);
+
+                var start = {x:playerPosition.x, y:0, z:playerPosition.z};
+                var end = {x : (playerPosition.x-80), y:0, z:playerPosition.z};
+                var tweenR = new TWEEN.Tween(start)
+                .to(end, 150)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
+
+                var bool = false;
+                done = false;
+
+                tweenR.onUpdate(function(){
+                    let z = start.z / 80;        
+                    if(z >= 0){
+                            if(lanes[z] === 'grass'){
+                                for(let i = 0; i < treeMatrix[z][0].length; i++){
+                                    if(Math.abs(end.x - treeMatrix[z][0][i].position.x) < 50){
+                                        tweenR.stop();
+                                        bool = true;
+                                        done = true;
+                                    }
+
+                                } 
+                                if(!bool){
+                                    player.position.x = start.x; 
+                                }
+                            }
+                            else{
+                                player.position.x = start.x;
+                            }
+                        }
+                        else{
+                            player.position.x = start.x;
+                        }
+
+
+                });
+
+                tweenR.onComplete(function(){
+                    done = true;
+                });
+             
+
+            }
