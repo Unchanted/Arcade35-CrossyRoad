@@ -670,3 +670,122 @@ function main(){
 
 
             }
+
+//function which tests for collisions between the player object and vehicles (which are contained in the collidableVehicle array)
+    function collisionVehicle(){
+            for(var vertexIndex = 0; vertexIndex < player.geometry.vertices.length; vertexIndex++){
+                    var localVertex = player.geometry.vertices[vertexIndex].clone();
+                    var globalVertex = localVertex.applyMatrix4(player.matrix);
+                    var directionVector = globalVertex.sub(player.position);
+
+                    var ray = new THREE.Raycaster(player.position, directionVector.clone().normalize() );
+                    var collisionResults = ray.intersectObjects(collidableVehicle);
+                    if(collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
+
+                        return true;
+                    }
+                        return false;
+                }
+        }
+    
+    // sets up the key controls for the player movement using the arrow keys
+    function setUpKeyControls(){
+                    var bool;
+                    document.onkeyup = function(e){                   
+                           if(player.position.x == 320){
+                                switch(e.keyCode){
+                             //up arrow
+                             case 38:
+                                    up();
+                                    break;  
+
+                            //right arrow
+                            case 39:
+                                right();
+                                break;
+                            //down arrow
+                            case 40:       
+                                back();
+                                break;
+
+                            }
+                           }
+                        else if(player.position.x == -320){
+                              switch(e.keyCode){
+                            //left arrow                        
+                            case 37:     
+                                left();
+                                break;
+                            //up arrow
+                            case 38:
+                                up();
+                                break;  
+
+                            //down arrow
+                            case 40:
+                                back();
+                                break;
+                            }
+                        }
+                        else if((player.position.x < 320 && player.position.x > -320) || (player.position.x ==0))  {
+
+                        switch (e.keyCode){
+                               //left arrow                        
+                            case 37:
+                                if(done)
+                                    left();
+                                break;
+                            //up arrow
+                            case 38:
+                                if(done)
+                                    up();
+                                break;
+
+                            //right arrow
+                            case 39:
+                                if(done)
+                                    right();
+                                break;
+                            //down arrow
+                            case 40:
+                                if(done)
+                                    back();
+                                break;
+                            }
+
+                        } 
+
+
+                    }
+                }
+
+    // function which displays an alert when the player object has collided with a car/truck object
+    // uses the hisCount variable to display this alert only once and then reloads the page
+    function  runOver(){
+                if(collisionVehicle()){
+                    hitCount++;
+                }
+                if(hitCount == 1){
+                   setTimeout(function(){
+                       console.log(Math.floor(player.position.z / 80));
+                       alert("MOOOOOOVE OUT OF THE WAY A LITTLE QUICKER NEXT TIME. YOU'RE SCORE WAS " + (Math.floor(player.position.z / 80)+2));
+                       location.reload();
+                   }, 20);
+
+                }  
+
+            }
+    // function which displays the fps statistics -- not used in final version
+    function initStats(type){
+        var panelType = (typeof type !== 'undefined' && type) && (!isNaN(type)) ? parseInt(type) : 0;
+        var stats = new Stats();
+        
+        stats.showPanel(panelType);
+        document.body.appendChild(stats.dom);
+        
+        return stats;
+        
+    }
+  
+
+ main();
