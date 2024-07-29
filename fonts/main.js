@@ -304,3 +304,116 @@ function truck(x,z) {
     return trucker;
     
   } 
+
+  //function that creates car
+function car(x,z) {
+  const car = new THREE.Group();
+  const color = vehicleColors[Math.floor(Math.random() * vehicleColors.length)];
+  
+  const frame = new THREE.Mesh(
+    new THREE.BoxBufferGeometry(100,20,50 ), 
+    new THREE.MeshPhongMaterial( { color, flatShading: true } )
+  );
+    frame.position.y = 10;
+  frame.castShadow = true;
+  frame.receiveShadow = true;
+    collidableVehicle.push(frame);
+    car.add(frame);
+  
+  const cabin = new THREE.Mesh(
+    new THREE.BoxBufferGeometry( 60, 24, 35), 
+    [
+      new THREE.MeshPhongMaterial( { color: 0xcccccc, flatShading: true}),//, map: carBackTexture } ),
+      new THREE.MeshPhongMaterial( { color: 0xcccccc, flatShading: true}),//, map: carFrontTexture } ),
+      new THREE.MeshPhongMaterial( { color: 0xcccccc, flatShading: true}),//, map: carRightSideTexture } ),
+      new THREE.MeshPhongMaterial( { color: 0xcccccc, flatShading: true}),//, map: carLeftSideTexture } ),
+      new THREE.MeshPhongMaterial( { color: 0xcccccc, flatShading: true } ), // top
+      new THREE.MeshPhongMaterial( { color: 0xcccccc, flatShading: true } ) // bottom
+    ]
+  );
+
+  cabin.position.set(-10,20,0);
+  //cabin.castShadow = true;
+  //cabin.receiveShadow = true;
+  collidableVehicle.push(cabin);
+  car.add( cabin );
+  
+  const backLeftWheel = new carWheel();
+  backLeftWheel.position.set(-36,5,-20);
+  car.add( backLeftWheel );
+    
+  const backRightWheel = new carWheel();
+  backRightWheel.position.set(-36,5,20);
+  car.add(backRightWheel);
+
+  const frontLeftWheel = new carWheel();
+  frontLeftWheel.position.set(36, 5, -20);
+    //collidableVehicle.push(frontLeftWheel);
+  car.add( frontLeftWheel );
+    
+  const frontRightWheel = new carWheel();
+  frontRightWheel.position.set(36, 5, 20);
+    //collidableVehicle.push(frontRightWheel);
+  car.add( frontRightWheel );
+
+  //car.castShadow = true;
+  //car.receiveShadow = false;
+    
+  car.position.set(x,20,z);
+    //collidableVehicle.push(car);
+  scene.add(car);
+  
+  return car;  
+}
+    
+    
+    //animation loop for the trucks -- trucks move at 3 different speeds and go back to the start when they moved too far
+    // need to figure out how to make the trucks look smooth --> likely has to do with the fps and the fact they are moving 3,5,7 units at a time
+    function truckAnimate(){
+        
+       function truckTween(x,time){
+                var start = {x: 700}; 
+                var end =   {x: -700};
+                var truckForward = new TWEEN.Tween(start)
+                .to(end,time)
+                .repeat(Infinity)
+                .start();
+
+            truckForward.onUpdate(function(){
+                trucksArray[x].position.x = start.x;
+            }); 
+        }
+        
+        for(let i = 0; i < trucksArray.length; i++){    
+            var rand = Math.floor(Math.random()*(8000-5000+1)+5000);
+            truckTween(i, rand);
+            
+        }
+        
+        
+    }
+    
+    function carAnimate(){
+      
+        function carTween(x,time){
+                var start = {x: -600}; 
+                var end =   {x: 600};
+                var carForward = new TWEEN.Tween(start)
+                .to(end,time)
+                .repeat(Infinity)
+                .start();
+            
+            carForward.onUpdate(function(){
+                carsArray[x].position.x = start.x;
+            }); 
+        }
+        
+        for(let i = 0; i < carsArray.length; i++){    
+            var rand = Math.floor(Math.random()*(5000-1000+1)+1000);
+            carTween(i, rand);
+            
+        }
+       
+        
+    }
+ 
