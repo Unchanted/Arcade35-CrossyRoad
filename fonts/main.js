@@ -87,3 +87,112 @@ function main(){
         });
         
  }     
+
+//function that generates a strip of road and either one or 2 trucks for that lane 
+   function road(x){
+       
+       //playable road 
+        var road_geo = new THREE.BoxGeometry(800,1,80,1);
+        var road_mat = new THREE.MeshPhongMaterial({color: 'gray'});         
+        var road = new THREE.Mesh(road_geo, road_mat);  
+       
+       //out of bounds road
+        var bound_geo = new THREE.BoxGeometry(2300,1,80,1);
+        var bound_mat = new THREE.MeshPhongMaterial({color: 'darkgrey'});
+        var bound = new THREE.Mesh(bound_geo, bound_mat);
+       
+       
+        var vehicleRand = Math.floor((Math.random() * 10) + 1);
+        let  i = 0;
+        if(vehicleRand % 2 === 0){
+            trucksArray.push(truck((Math.random()*900)+1,x*80));
+            i++;
+        }
+        else{
+            carsArray.push(car((Math.random()*900)+1,x*80));
+            i++;
+        }
+        
+
+        bound.position.set(0,-1,x*80);
+        road.position.set(0,0,x*80);
+        scene.add(bound);
+        scene.add(road);
+    }
+    
+    //function that generates a strip of grass and 1-5 trees for that strip of grass. 
+   function grass(x){
+       
+        const grass = new THREE.Mesh(
+             new THREE.BoxGeometry(800,10,80,1), 
+             new THREE.MeshLambertMaterial({color: 'green'})
+        );
+       
+        const out = new THREE.Mesh(
+            new THREE.BoxGeometry(2000,10,80,1),
+            new THREE.MeshLambertMaterial({color: 'darkgreen'})
+        );
+       
+        //number of trees in one strip
+        var treeCount = Math.floor((Math.random() * 4) + 1);
+       //number of trees total
+        var treeNumber = 0;
+        treeMatrix[x] = [];
+        let innerArray = [];
+       
+        for(treeCount; treeCount >0; treeCount--){
+            
+            var treeGrid =Math.floor((Math.random()*8) + 1);
+            if(treeCount % 3 ==0){
+               innerArray.push(tree((400 - treeGrid*100),x*80)); 
+            }
+            else{
+               innerArray.push(tree((-400 + treeGrid*100),x*80));
+            } 
+            
+        }
+        treeMatrix[x].push(innerArray);
+       
+        grass.position.set(0,0,x*80);
+        out.position.set(0,-1,x*80);
+        scene.add(out);
+        scene.add(grass);
+   }
+         
+    
+    // function that creates trees -- made up of a trunk and a leaf
+    function tree(x,z){
+        
+
+        treeMesh = new THREE.Group();
+        
+        const trunk = new THREE.Mesh(
+            new THREE.CubeGeometry(25,60,25),
+            new THREE.MeshLambertMaterial({color: 0x9A6169})
+        ); 
+        trunk.position.set(x,10, z);
+        trunk.castShadow = true;
+        trunk.receiveShadow = true;
+        treeMesh.add(trunk);
+        
+        const leaf = new THREE.Mesh(
+            new THREE.CubeGeometry(50,50,50,2,2,2),
+             new THREE.MeshLambertMaterial({wireframe: false, color: 'lightgreen'})
+        );
+        leaf.position.set(x,50,z);
+        leaf.castShadow = true;
+        leaf.receiveShadow = true;
+        treeMesh.add(leaf);
+        
+        const cage = new THREE.Mesh(
+            new THREE.CubeGeometry(70,80,70,5,5,5),
+            new THREE.MeshLambertMaterial({wireframe: true, visible:false})
+        );
+        cage.position.set(x,50,z);
+        treeMesh.add(cage);
+        scene.add(cage);
+        
+        scene.add(treeMesh);
+        return cage;
+        
+    }
