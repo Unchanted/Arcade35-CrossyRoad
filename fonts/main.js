@@ -72,7 +72,7 @@ function main(){
         return lanes;
     }
     
-//function that uses the lanes[] to call the grass() and road() functions, which are placed in the scene
+     //function that uses the lanes[] to call the grass() and road() functions, which are placed in the scene
    function lane(){
        let count = 0;
         lanes.forEach(function(x){
@@ -87,8 +87,9 @@ function main(){
         });
         
  }     
-
-//function that generates a strip of road and either one or 2 trucks for that lane 
+    
+    
+    //function that generates a strip of road and either one or 2 trucks for that lane 
    function road(x){
        
        //playable road 
@@ -196,8 +197,8 @@ function main(){
         return cage;
         
     }
-
- //function that creates the character the player uses
+    
+    //function that creates the character the player uses
     function player(){
         
         
@@ -305,7 +306,7 @@ function truck(x,z) {
     
   } 
 
-  //function that creates car
+    //function that creates car
 function car(x,z) {
   const car = new THREE.Group();
   const color = vehicleColors[Math.floor(Math.random() * vehicleColors.length)];
@@ -416,7 +417,12 @@ function car(x,z) {
        
         
     }
- generateLaneArray(1000);  
+ 
+ 
+
+    
+   
+    generateLaneArray(1000);  
     lane();
     player();
     
@@ -471,7 +477,8 @@ function car(x,z) {
     }
   
     
-function left(){
+
+    function left(){
         let playerPosition = new THREE.Vector3();
         playerPosition.setFromMatrixPosition(player.matrixWorld);
         
@@ -624,7 +631,24 @@ function left(){
                         player.position.z = start.z;
                 }           
         });
-    function collisionVehicle(){
+        
+        tweenCamera.onUpdate(function(){
+            //if(!bool){
+                camera.position.z = camStart.z;
+            //}
+        });
+        
+        tweenBack.onComplete(function(){
+            done = true;
+        });
+        
+        
+        
+    }
+    
+            
+    
+function collisionVehicle(){
     for(var vertexIndex = 0; vertexIndex < player.geometry.vertices.length; vertexIndex++){
             var localVertex = player.geometry.vertices[vertexIndex].clone();
             var globalVertex = localVertex.applyMatrix4(player.matrix);
@@ -734,4 +758,71 @@ function left(){
         
     }  
       
-             }
+    }
+
+    function initStats(type){
+        var panelType = (typeof type !== 'undefined' && type) && (!isNaN(type)) ? parseInt(type) : 0;
+        var stats = new Stats();
+        
+        stats.showPanel(panelType);
+        document.body.appendChild(stats.dom);
+        
+        return stats;
+        
+    }
+    
+    /*function score(){
+        var loader = new THREE.FontLoader();
+
+        loader.load( "https://fonts.googleapis.com/css?family=Open+Sans&display=swap", function ( font ) {
+
+            var geometry = new THREE.TextGeometry( `${player.position.z / 80}`, {
+                font: font,
+                size: 500,
+                height: 5,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 10,
+                bevelSize: 8,
+                bevelOffset: 0,
+                bevelSegments: 5
+            } );
+        } );
+        
+        var textMaterial = new THREE.MeshPhongMaterial( 
+        { color: 0xff0000, specular: 0xffffff }
+    );
+
+    var mesh = new THREE.Mesh(geometry, textMaterial);
+        
+        scene.add(mesh);
+    }*/
+    
+
+      truckAnimate(); 
+      carAnimate();
+    //score();
+    
+    function animate(){
+        requestAnimationFrame(animate);
+        
+       // updatePhysics();
+       // carGroup.update();
+        TWEEN.update();
+        stats.update();
+        setupKeyControls();
+                
+        renderer.render(scene, camera);
+        
+        runOver();
+    }
+    animate();
+    }
+
+    
+    
+
+    
+                        
+   
+ main();
