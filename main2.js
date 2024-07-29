@@ -26,7 +26,7 @@ var treeMatrix = [];
 
 function main(){
     
-    //var stats = initStats();
+    //var stats = initStats(); //performance test
     var carsArray = [];
     //creates the scene and gives it a skyblue background
     scene = new THREE.Scene();
@@ -59,6 +59,7 @@ function main(){
     scene.add(backLight);
     
     // score display
+    //Best practice is to move this to a stylesheet
     var score = document.createElement('div');
     score.style.position = 'absolute';
     score.style.width = 7+'%';//100 + 'px';
@@ -71,10 +72,10 @@ function main(){
     document.body.appendChild(score);      
     
     
-    
+    //for..of https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of
     //function that is used to generate an array with road and grass randomly assigned. It is used later in when the road and grass are actually created. 
     function generateLaneArray(size){
-        for(let x= 0; x < size; x++){
+        for(x of size){
             if((Math.floor((Math.random() * 2) + 1)) === 1)
                 lanes[x] = 'road';
             else
@@ -82,11 +83,11 @@ function main(){
         }
         return lanes;
     }
-    
+     //Can use an arrow function: https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Functions/Arrow_functions
      //function that uses the lanes[] to call the grass() and road() functions, which are placed in the scene
    function lane(){
        let count = 0;
-        lanes.forEach(function(x){
+        lanes.forEach((x) => {
             if(x === 'road'){
                 let stripOfRoad = new road(count);
                 count++;
@@ -103,7 +104,14 @@ function main(){
     generateLaneArray(800);  
     lane();
     playerObject();
-    camera.position.set(0,300, player.position.z -180);
+    if(window.innerWidth > window.innerHeight){
+        camera.position.set(0,300, player.position.z -180);
+        
+    }
+    else{
+        camera.position.set(0,475, player.position.z - 180);
+    }
+    
     carAnimate();
     truckAnimate();
 
@@ -122,7 +130,7 @@ function main(){
     animate();
     
 }
-
+    //should abstract out these classes into their own files, helps with readability and mantainability 
     //function that generates a strip of road and either one or 2 trucks for that lane 
    class road{
        
@@ -395,16 +403,15 @@ function main(){
                     .to(end,time)
                     .repeat(Infinity)
                     .start();
-
-                truckForward.onUpdate(function(){
+                //arrow function
+                truckForward.onUpdate(()=>{
                     trucksArray[x].position.x = start.x;
                 }); 
             }
 
-            for(let i = 0; i < trucksArray.length; i++){    
+            for(i in trucksArray.length){    
                 var rand = Math.floor(Math.random()*(8000-5000+1)+5000);
                 truckTween(i, rand);
-
             }
         }
     // animation loop for the cars    
@@ -423,13 +430,10 @@ function main(){
                 }); 
             }
 
-            for(let i = 0; i < carsArray.length; i++){    
+            for(i in carsArray.length){    
                 var rand = Math.floor(Math.random()*(5000-1000+1)+1000);
                 carTween(i, rand);
-
             }
-
-
         }
 
     
@@ -657,7 +661,7 @@ function main(){
 
     //function which tests for collisions between the player object and vehicles (which are contained in the collidableVehicle array)
     function collisionVehicle(){
-            for(var vertexIndex = 0; vertexIndex < player.geometry.vertices.length; vertexIndex++){
+            for(vertexIndex in player.geometry.vertices.length){
                     var localVertex = player.geometry.vertices[vertexIndex].clone();
                     var globalVertex = localVertex.applyMatrix4(player.matrix);
                     var directionVector = globalVertex.sub(player.position);
@@ -668,6 +672,7 @@ function main(){
 
                         return true;
                     }
+                        //looks like unreachable code?
                         return false;
                 }
         }
@@ -677,19 +682,33 @@ function main(){
                     document.onkeyup = function(e){                   
                            if(player.position.x == 320){
                                 switch(e.keyCode){
-                             //up arrow
-                             case 38,87:
+                             //up arrow/ W
+                             case 38:
+                                if(done)
+                                    up();
+                                break;  
+                            case 87:
                                 if(done)
                                     up();
                                 break;  
 
-                            //right arrow
-                            case 39,68:
+                            //right arrow/ D
+                            case 39:
                                 if(done)
                                     right();
                                 break;
-                            //down arrow
-                            case 40,83: 
+                            case 68:
+                                if(done)
+                                    right();
+                                break;
+                            //down arrow/ S
+                            case 40: 
+                                if(done){
+                                   if(player.position.z > -160)
+                                    back(); 
+                                }
+                                break;
+                            case 83: 
                                 if(done){
                                    if(player.position.z > -160)
                                     back(); 
@@ -699,19 +718,33 @@ function main(){
                            }
                         else if(player.position.x == -320){
                               switch(e.keyCode){
-                            //left arrow                        
-                            case 37,65: 
+                            //left arrow/ A                      
+                            case 37: 
                                 if(done)
                                     left();
                                 break;
-                            //up arrow
-                            case 38,87:
+                            case 65: 
+                                if(done)
+                                    left();
+                                break;
+                            //up arrow/ W
+                            case 38:
                                 if(done)
                                     up();
-                                break;  
+                                break; 
+                            case 87:
+                                if(done)
+                                    up();
+                                break;
 
-                            //down arrow
+                            //down arrow/ S
                             case 40,83:
+                                if(done){
+                                    if(player.position.z > -160)
+                                        back();
+                                }
+                                break;
+                            case 83:
                                 if(done){
                                     if(player.position.z > -160)
                                         back();
@@ -722,24 +755,42 @@ function main(){
                         else if((player.position.x < 320 && player.position.x > -320) || (player.position.x ==0))  {
 
                         switch (e.keyCode){
-                               //left arrow                        
-                            case 37,65:
+                               //left arrow/ A                        
+                            case 37:
                                 if(done)
                                     left();
                                 break;
-                            //up arrow
-                            case 38,87:
+                            case 65:
+                                if(done)
+                                    left();
+                                break;
+                            //up arrow/ W
+                            case 38:
+                                if(done)
+                                    up();
+                                break;
+                            case 87:
                                 if(done)
                                     up();
                                 break;
 
-                            //right arrow
-                            case 39,68:
+                            //right arrow/ D
+                            case 39:
                                 if(done)
                                     right();
                                 break;
-                            //down arrow
-                            case 40,83:
+                            case 68:
+                                if(done)
+                                    right();
+                                break;
+                            //down arrow/ S
+                            case 40:
+                                if(done){
+                                    if(player.position.z > -160)
+                                        back();
+                                }
+                                break;
+                            case 83:
                                 if(done){
                                     if(player.position.z > -160)
                                         back();
@@ -753,13 +804,13 @@ function main(){
                     }
                 }
 
-
+    // function that allows user to play this game on mobile using swipe events
     function setupSwipeControls(){
         // swiped-left
         document.addEventListener('swiped-left', function(e) {
             if(-320 <= player.position.x && player.position.x < 320){
                 if(done)
-                    left;
+                    left();
             }
         });
 
@@ -796,7 +847,7 @@ function main(){
                 if(hitCount == 1){
                    setTimeout(function(){
                        console.log(Math.floor(player.position.z / 80));
-                       alert("MOOOOOOVE OUT OF THE WAY A LITTLE QUICKER NEXT TIME. YOU'RE SCORE WAS " + (Math.floor(player.position.z / 80)+2));
+                       alert("MOOOOOOVE OUT OF THE WAY A LITTLE QUICKER NEXT TIME. YOUR SCORE WAS " + (Math.floor(player.position.z / 80)+2));
                        location.reload();
                    }, 20);
 
