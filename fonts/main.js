@@ -585,138 +585,214 @@ function car(x,z) {
         
     }
 
-const back = () => {
-  const playerPosition = new THREE.Vector3();
-  playerPosition.setFromMatrixPosition(player.matrixWorld);
+    function back(){
+        var playerPosition = new THREE.Vector3();
+        playerPosition.setFromMatrixPosition(player.matrixWorld);
+        
+        
+        var start = {x:playerPosition.x, y:0, z:playerPosition.z};
+        var end = {x :playerPosition.x, y:0, z:(playerPosition.z - 80)};
+        var tweenBack = new TWEEN.Tween(start)
+        .to(end,150)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
+        
+        var camStart = {x:0, y:300, z:(playerPosition.z - 180)};
+        var camEnd = {x :0, y:300, z:(playerPosition.z - 200)};
+        var tweenCamera = new TWEEN.Tween(camStart)
+        .to(camEnd, 5000)
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .start();
+        
+        var bool = false;
+        done = false;
+        
+        tweenBack.onUpdate(function(){
+                let z = end.z / 80;
+                 if(z >= 0){
+                     if(lanes[z] === 'grass'){
+                        for(let i = 0; i < treeMatrix[z][0].length; i++){
+                            if(Math.abs(end.x - treeMatrix[z][0][i].position.x) < 50){
+                                tweenBack.stop();
+                                bool = true;
+                                done = true;
+                            }
 
-  const start = { x: playerPosition.x, y: 0, z: playerPosition.z };
-  const end = { x: playerPosition.x, y: 0, z: playerPosition.z - 80 };
+                        } 
+                        if(!bool){
+                            player.position.z = start.z; 
+                        }
+                    }
+                    else{
+                        player.position.z = start.z;
+                    }
+                 }
+                else{
+                        player.position.z = start.z;
+                }           
+        });
+        
+        tweenCamera.onUpdate(function(){
+            //if(!bool){
+                camera.position.z = camStart.z;
+            //}
+        });
+        
+        tweenBack.onComplete(function(){
+            done = true;
+        });
+        
+        
+        
+    }
+    
+            
+    
+function collisionVehicle(){
+    for(var vertexIndex = 0; vertexIndex < player.geometry.vertices.length; vertexIndex++){
+            var localVertex = player.geometry.vertices[vertexIndex].clone();
+            var globalVertex = localVertex.applyMatrix4(player.matrix);
+            var directionVector = globalVertex.sub(player.position);
+        
+            var ray = new THREE.Raycaster(player.position, directionVector.clone().normalize() );
+            var collisionResults = ray.intersectObjects(collidableVehicle);
+            if(collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
 
-  const tweenBack = new TWEEN.Tween(start)
-    .to(end, 150)
-    .easing(TWEEN.Easing.Quadratic.Out)
-    .onUpdate(() => updatePlayerPosition(end, start))
-    .onComplete(() => { done = true; })
-    .start();
-
-  const camStart = { x: 0, y: 300, z: playerPosition.z - 180 };
-  const camEnd = { x: 0, y: 300, z: playerPosition.z - 200 };
-
-  new TWEEN.Tween(camStart)
-    .to(camEnd, 5000)
-    .easing(TWEEN.Easing.Quadratic.InOut)
-    .onUpdate(() => { camera.position.z = camStart.z; })
-    .start();
-
-  done = false;
-};
-
-const updatePlayerPosition = (end, start) => {
-  let bool = false;
-  const z = Math.floor(end.z / 80);
-  if (z >= 0) {
-    if (lanes[z] === 'grass') {
-      for (let i = 0; i < treeMatrix[z][0].length; i++) {
-        if (Math.abs(end.x - treeMatrix[z][0][i].position.x) < 50) {
-          tweenBack.stop();
-          bool = true;
-          done = true;
+                return true;
+            }
+                return false;
         }
-      }
-      if (!bool) {
-        player.position.z = start.z;
-      }
-    } else {
-      player.position.z = start.z;
+}
+
+    
+
+    //Arrow key controls for moving the player object
+    function setupKeyControls(){
+            var bool;
+            document.onkeyup = function(e){                   
+                   if(player.position.x == 320){
+                        switch(e.keyCode){
+                     //up arrow
+                     case 38:
+                            up();
+                            break;  
+  
+                    //right arrow
+                    case 39:
+                        right();
+                        break;
+                    //down arrow
+                    case 40:       
+                        back();
+                        break;
+            
+                    }
+                   }
+                else if(player.position.x == -320){
+                      switch(e.keyCode){
+                    //left arrow                        
+                    case 37:     
+                        left();
+                        break;
+                    //up arrow
+                    case 38:
+                        up();
+                        break;  
+                           
+                    //down arrow
+                    case 40:
+                        back();
+                        break;
+                    }
+                }
+                else if((player.position.x < 320 && player.position.x > -320) || (player.position.x ==0))  {
+                    
+                switch (e.keyCode){
+                       //left arrow                        
+                    case 37:
+                        if(done)
+                            left();
+                        break;
+                    //up arrow
+                    case 38:
+                        if(done)
+                            up();
+                        break;
+                    
+                    //right arrow
+                    case 39:
+                        if(done)
+                            right();
+                        break;
+                    //down arrow
+                    case 40:
+                        if(done)
+                            back();
+                        break;
+                    }
+                    
+                } 
+                
+                
+            }
+        }
+    
+       
+     
+   
+    var count = 0;
+    function runOver(){
+        if(collisionVehicle()){
+            count++;
+        }
+    if(count == 1){
+       setTimeout(function(){
+           console.log(Math.floor(player.position.z / 80));
+           alert("Play Again? Your Score was " + Math.floor(player.position.z / 80));
+           location.reload();
+       }, 20);
+        
+        
+    }  
+      
     }
-  } else {
-    player.position.z = start.z;
-  }
-};
 
-const collisionVehicle = () => {
-  for (let vertexIndex = 0; vertexIndex < player.geometry.vertices.length; vertexIndex++) {
-    const localVertex = player.geometry.vertices[vertexIndex].clone();
-    const globalVertex = localVertex.applyMatrix4(player.matrix);
-    const directionVector = globalVertex.sub(player.position);
-
-    const ray = new THREE.Raycaster(player.position, directionVector.clone().normalize());
-    const collisionResults = ray.intersectObjects(collidableVehicle);
-    if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
-      return true;
+    function initStats(type){
+        var panelType = (typeof type !== 'undefined' && type) && (!isNaN(type)) ? parseInt(type) : 0;
+        var stats = new Stats();
+        
+        stats.showPanel(panelType);
+        document.body.appendChild(stats.dom);
+        
+        return stats;
+        
     }
-  }
-  return false;
-};
+    
 
-const setupKeyControls = () => {
-  document.onkeyup = (e) => {
-    const { x, z } = player.position;
-    if (x === 320) {
-      handleKeyUp(e.keyCode, 'right', 'up', 'back');
-    } else if (x === -320) {
-      handleKeyUp(e.keyCode, 'left', 'up', 'back');
-    } else if ((x < 320 && x > -320) || x === 0) {
-      handleKeyUp(e.keyCode, 'left', 'up', 'right', 'back');
+      truckAnimate(); 
+      carAnimate();
+    //score();
+    
+    function animate(){
+        requestAnimationFrame(animate);
+        
+       // updatePhysics();
+       // carGroup.update();
+        TWEEN.update();
+        stats.update();
+        setupKeyControls();
+                
+        renderer.render(scene, camera);
+        
+        runOver();
     }
-  };
-};
-
-const handleKeyUp = (keyCode, ...directions) => {
-  if (done) {
-    switch (keyCode) {
-      case 37: // left arrow
-        directions.includes('left') && left();
-        break;
-      case 38: // up arrow
-        directions.includes('up') && up();
-        break;
-      case 39: // right arrow
-        directions.includes('right') && right();
-        break;
-      case 40: // down arrow
-        directions.includes('back') && back();
-        break;
+    animate();
     }
-  }
-};
 
-let count = 0;
-const runOver = () => {
-  if (collisionVehicle()) {
-    count++;
-  }
-  if (count === 1) {
-    setTimeout(() => {
-      const score = Math.floor(player.position.z / 80);
-      console.log(score);
-      alert(`Play Again? Your Score was ${score}`);
-      location.reload();
-    }, 20);
-  }
-};
+    
+    
 
-const initStats = (type = 0) => {
-  const panelType = !isNaN(type) ? parseInt(type) : 0;
-  const stats = new Stats();
-  stats.showPanel(panelType);
-  document.body.appendChild(stats.dom);
-  return stats;
-};
-
-const animate = () => {
-  requestAnimationFrame(animate);
-  TWEEN.update();
-  stats.update();
-  setupKeyControls();
-  renderer.render(scene, camera);
-  runOver();
-};
-
-const main = () => {
-  truckAnimate();
-  carAnimate();
-  animate();
-};
-
-main();
+    
+                        
+   
+ main();
