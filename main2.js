@@ -40,7 +40,6 @@ function main(){
     
     //creates the camera and sets its initial placement
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-    camera.position.set(0,300, -310);
     camera.rotation.set(60*Math.PI/180, -180*Math.PI/180, 0);
     camera.updateProjectionMatrix();
     
@@ -104,6 +103,7 @@ function main(){
     generateLaneArray(800);  
     lane();
     playerObject();
+    camera.position.set(0,300, player.position.z -180);
     carAnimate();
     truckAnimate();
 
@@ -112,7 +112,8 @@ function main(){
         requestAnimationFrame(animate);
         TWEEN.update();
         //stats.update();
-        setUpKeyControls();
+        setupKeyControls();
+        setupSwipeControls();
         score.innerHTML = `${Math.floor(player.position.z / 80) + 2}`;
         renderer.render(scene, camera);
         runOver();
@@ -304,8 +305,8 @@ function main(){
        
        
     }
-
-   //generates a strip of grass with trees 
+    
+    //generates a strip of grass with trees 
    class grass{
        
        
@@ -388,8 +389,8 @@ function main(){
     function truckAnimate(){
 
            function truckTween(x,time){
-                    var start = {x: 700}; 
-                    var end =   {x: -700};
+                    var start = {x: 1200}; 
+                    var end =   {x: -1200};
                     var truckForward = new TWEEN.Tween(start)
                     .to(end,time)
                     .repeat(Infinity)
@@ -406,13 +407,12 @@ function main(){
 
             }
         }
-
- // animation loop for the cars    
+    // animation loop for the cars    
     function  carAnimate(){
       
             function carTween(x,time){
-                    var start = {x: -600}; 
-                    var end =   {x: 600};
+                    var start = {x: -1200}; 
+                    var end =   {x: 1200};
                     var carForward = new TWEEN.Tween(start)
                     .to(end,time)
                     .repeat(Infinity)
@@ -432,7 +432,8 @@ function main(){
 
         }
 
- //function that creates the character the player 
+    
+    //function that creates the character the player 
     function playerObject(){
             
                 var textureLoader = new THREE.TextureLoader();
@@ -454,12 +455,9 @@ function main(){
     
     // player movement animation functions below (right, left, up, and back)
     function right(){
-                var playerPosition = new THREE.Vector3();
-                playerPosition.setFromMatrixPosition(player.matrixWorld);
-
-                var start = {x:playerPosition.x, y:0, z:playerPosition.z};
-                var end = {x : (playerPosition.x-80), y:0, z:playerPosition.z};
-                var tweenR = new TWEEN.Tween(start)
+                let start = {x:player.position.x, y:0, z:player.position.z};
+                let end = {x : (player.position.x-80), y:0, z:player.position.z};
+                let tweenR = new TWEEN.Tween(start)
                 .to(end, 150)
                 .easing(TWEEN.Easing.Quadratic.Out)
                 .start();
@@ -504,13 +502,8 @@ function main(){
 
 
     function left(){
-                let playerPosition = new THREE.Vector3();
-                playerPosition.setFromMatrixPosition(player.matrixWorld);
-
-
-                let start = {x:playerPosition.x, y:0, z:playerPosition.z};
-                let end = {x : (playerPosition.x+80), y:10, z:playerPosition.z};
-                //let end = {x : fakePosition.x, y: 0, z :0};
+                let start = {x:player.position.x, y:0, z:player.position.z};
+                let end = {x : (player.position.x+80), y:10, z:player.position.z};
                 let tweenL = new TWEEN.Tween(start)
                 .to(end, 150)
                 .easing(TWEEN.Easing.Quadratic.Out)
@@ -552,19 +545,16 @@ function main(){
             }
 
     function up(){
-                var playerPosition = new THREE.Vector3();
-                playerPosition.setFromMatrixPosition(player.matrixWorld);
-
-                var camStart = {x:0, y:300, z:(playerPosition.z - 200)};
-                var camEnd = {x :0, y:300, z:(playerPosition.z - 180)};
-                var tweenCam = new TWEEN.Tween(camStart)
-                .to(camEnd, 2000)
+                let camStart = {x:0, y:300, z:(camera.position.z)};
+                let camEnd = {x :0, y:300, z:(player.position.z - 180)};
+                let tweenCam = new TWEEN.Tween(camStart)
+                .to(camEnd, 1500)
                 .easing(TWEEN.Easing.Quadratic.Out)
                 .start();
 
-                var start = {x:playerPosition.x, y:0, z:playerPosition.z};
-                var end = {x :playerPosition.x, y:0, z:(playerPosition.z + 80)};
-                var tweenUp = new TWEEN.Tween(start)
+                let start = {x:player.position.x, y:0, z:player.position.z};
+                let end = {x :player.position.x, y:0, z:(player.position.z + 80)};
+                let tweenUp = new TWEEN.Tween(start)
                 .to(end, 150)
                 .easing(TWEEN.Easing.Quadratic.Out)
                 .start();
@@ -611,20 +601,16 @@ function main(){
             }
 
     function  back(){
-                var playerPosition = new THREE.Vector3();
-                playerPosition.setFromMatrixPosition(player.matrixWorld);
-
-
-                var start = {x:playerPosition.x, y:0, z:playerPosition.z};
-                var end = {x :playerPosition.x, y:0, z:(playerPosition.z - 80)};
-                var tweenBack = new TWEEN.Tween(start)
+                let start = {x:player.position.x, y:0, z:player.position.z};
+                let end = {x :player.position.x, y:0, z:(player.position.z - 80)};
+                let tweenBack = new TWEEN.Tween(start)
                 .to(end,150)
                 .easing(TWEEN.Easing.Quadratic.Out)
                 .start();
 
-                var camStart = {x:0, y:300, z:(playerPosition.z - 180)};
-                var camEnd = {x :0, y:300, z:(playerPosition.z - 200)};
-                var tweenCamera = new TWEEN.Tween(camStart)
+                let camStart = {x:0, y:300, z:(camera.position.z)};
+                let camEnd = {x :0, y:300, z:(player.position.z - 200)};
+                let tweenCamera = new TWEEN.Tween(camStart)
                 .to(camEnd, 5000)
                 .easing(TWEEN.Easing.Quadratic.InOut)
                 .start();
@@ -658,9 +644,7 @@ function main(){
                 });
 
                 tweenCamera.onUpdate(function(){
-                    //if(!bool){
                         camera.position.z = camStart.z;
-                    //}
                 });
 
                 tweenBack.onComplete(function(){
@@ -671,7 +655,7 @@ function main(){
 
             }
 
-//function which tests for collisions between the player object and vehicles (which are contained in the collidableVehicle array)
+    //function which tests for collisions between the player object and vehicles (which are contained in the collidableVehicle array)
     function collisionVehicle(){
             for(var vertexIndex = 0; vertexIndex < player.geometry.vertices.length; vertexIndex++){
                     var localVertex = player.geometry.vertices[vertexIndex].clone();
@@ -689,41 +673,49 @@ function main(){
         }
     
     // sets up the key controls for the player movement using the arrow keys
-    function setUpKeyControls(){
-                    var bool;
+    function setupKeyControls(){
                     document.onkeyup = function(e){                   
                            if(player.position.x == 320){
                                 switch(e.keyCode){
                              //up arrow
-                             case 38:
+                             case 38,87:
+                                if(done)
                                     up();
-                                    break;  
+                                break;  
 
                             //right arrow
-                            case 39:
-                                right();
+                            case 39,68:
+                                if(done)
+                                    right();
                                 break;
                             //down arrow
-                            case 40:       
-                                back();
+                            case 40,83: 
+                                if(done){
+                                   if(player.position.z > -160)
+                                    back(); 
+                                }
                                 break;
-
                             }
                            }
                         else if(player.position.x == -320){
                               switch(e.keyCode){
                             //left arrow                        
-                            case 37:     
-                                left();
+                            case 37,65: 
+                                if(done)
+                                    left();
                                 break;
                             //up arrow
-                            case 38:
-                                up();
+                            case 38,87:
+                                if(done)
+                                    up();
                                 break;  
 
                             //down arrow
-                            case 40:
-                                back();
+                            case 40,83:
+                                if(done){
+                                    if(player.position.z > -160)
+                                        back();
+                                }
                                 break;
                             }
                         }
@@ -731,25 +723,27 @@ function main(){
 
                         switch (e.keyCode){
                                //left arrow                        
-                            case 37:
+                            case 37,65:
                                 if(done)
                                     left();
                                 break;
                             //up arrow
-                            case 38:
+                            case 38,87:
                                 if(done)
                                     up();
                                 break;
 
                             //right arrow
-                            case 39:
+                            case 39,68:
                                 if(done)
                                     right();
                                 break;
                             //down arrow
-                            case 40:
-                                if(done)
-                                    back();
+                            case 40,83:
+                                if(done){
+                                    if(player.position.z > -160)
+                                        back();
+                                }
                                 break;
                             }
 
@@ -758,6 +752,40 @@ function main(){
 
                     }
                 }
+
+
+    function setupSwipeControls(){
+        // swiped-left
+        document.addEventListener('swiped-left', function(e) {
+            if(-320 <= player.position.x && player.position.x < 320){
+                if(done)
+                    left;
+            }
+        });
+
+        // swiped-right
+        document.addEventListener('swiped-right', function(e) {
+            if(-320 < player.position.x && player.position.x <= 320){
+                if(done)
+                    right();
+            }
+
+        });
+
+        // swiped-up
+        document.addEventListener('swiped-up', function(e) {
+            up();
+        });
+
+        // swiped-down
+        document.addEventListener('swiped-down', function(e) {
+            if(player.position.z > -160){
+                if(done)
+                    back();
+            }
+        });
+
+    }
 
     // function which displays an alert when the player object has collided with a car/truck object
     // uses the hisCount variable to display this alert only once and then reloads the page
