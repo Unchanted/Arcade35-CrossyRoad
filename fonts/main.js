@@ -471,41 +471,55 @@ function car(x,z) {
     }
   
     
-
-    function left() {
-    const playerPosition = new THREE.Vector3();
-    playerPosition.setFromMatrixPosition(player.matrixWorld);
-
-    const start = { x: playerPosition.x, y: 0, z: playerPosition.z };
-    const end = { x: playerPosition.x + 80, y: 10, z: playerPosition.z };
-    const tweenL = new TWEEN.Tween(start)
+function left(){
+        let playerPosition = new THREE.Vector3();
+        playerPosition.setFromMatrixPosition(player.matrixWorld);
+        
+        
+        let start = {x:playerPosition.x, y:0, z:playerPosition.z};
+        let end = {x : (playerPosition.x+80), y:10, z:playerPosition.z};
+        //let end = {x : fakePosition.x, y: 0, z :0};
+        let tweenL = new TWEEN.Tween(start)
         .to(end, 150)
         .easing(TWEEN.Easing.Quadratic.Out)
         .start();
+        
+        var bool = false;
+        done = false;
+        
+        tweenL.onUpdate(function(){
+            let z = start.z / 80;
+             if(z >= 0){
+                 if(lanes[z] === 'grass'){
+                    for(let i = 0; i < treeMatrix[z][0].length; i++){
+                        if(Math.abs(end.x - treeMatrix[z][0][i].position.x) < 50){
+                            tweenL.stop();
+                            bool = true;
+                            done = true;
+                        }
 
-    let done = false;
+                    } 
+                    if(!bool){
+                        player.position.x = start.x; 
+                    }
+                }
+                else{
+                    player.position.x = start.x;
+                }
+                 
+             }
+             else{
+                 player.position.x = start.x;
+             }
 
-    tweenL.onUpdate(() => {
-        const z = start.z / 80;
-        if (z >= 0 && lanes[z] === 'grass') {
-            const collision = treeMatrix[z][0].some(tree => Math.abs(end.x - tree.position.x) < 50);
-            if (collision) {
-                tweenL.stop();
-                done = true;
-            } else {
-                player.position.x = start.x;
-            }
-        } else {
-            player.position.x = start.x;
-        }
-    });
-
-    tweenL.onComplete(() => {
-        done = true;
-    });
+        });
+        
+       tweenL.onComplete(function(){
+           done = true;
+       });
     }
-
-function up(){
+    
+    function up(){
         var playerPosition = new THREE.Vector3();
         playerPosition.setFromMatrixPosition(player.matrixWorld);
                 
@@ -562,4 +576,52 @@ function up(){
             done = true;
         });
         
-}
+    }
+
+    function back(){
+        var playerPosition = new THREE.Vector3();
+        playerPosition.setFromMatrixPosition(player.matrixWorld);
+        
+        
+        var start = {x:playerPosition.x, y:0, z:playerPosition.z};
+        var end = {x :playerPosition.x, y:0, z:(playerPosition.z - 80)};
+        var tweenBack = new TWEEN.Tween(start)
+        .to(end,150)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .start();
+        
+        var camStart = {x:0, y:300, z:(playerPosition.z - 180)};
+        var camEnd = {x :0, y:300, z:(playerPosition.z - 200)};
+        var tweenCamera = new TWEEN.Tween(camStart)
+        .to(camEnd, 5000)
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .start();
+        
+        var bool = false;
+        done = false;
+        
+        tweenBack.onUpdate(function(){
+                let z = end.z / 80;
+                 if(z >= 0){
+                     if(lanes[z] === 'grass'){
+                        for(let i = 0; i < treeMatrix[z][0].length; i++){
+                            if(Math.abs(end.x - treeMatrix[z][0][i].position.x) < 50){
+                                tweenBack.stop();
+                                bool = true;
+                                done = true;
+                            }
+
+                        } 
+                        if(!bool){
+                            player.position.z = start.z; 
+                        }
+                    }
+                    else{
+                        player.position.z = start.z;
+                    }
+                 }
+                else{
+                        player.position.z = start.z;
+                }           
+        });
+    
