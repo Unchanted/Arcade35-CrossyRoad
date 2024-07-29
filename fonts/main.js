@@ -196,3 +196,111 @@ function main(){
         return cage;
         
     }
+
+ //function that creates the character the player uses
+    function player(){
+        
+        
+        player = new  THREE.Mesh(
+            new THREE.BoxGeometry(30,30,50,50,50,50),
+            //new THREE.MeshLambertMaterial({visible : true, color: 'gray', wireframe: true})
+            new THREE.MeshLambertMaterial({map: THREE.ImageUtils.loadTexture('cow.jpg')})
+        );   
+         
+        player.position.set(0,20,-160);
+        player.name = 'player';
+        player.castShadow = true;
+        player.receiveShadow = true;
+        scene.add(player);
+        return player;
+    }
+    
+   /* const truckFrontTexture = new Texture(30,30,[{x: 15, y: 0, w: 10, h: 30 }]);
+const truckRightSideTexture = new Texture(25,30,[{x: 0, y: 15, w: 10, h: 10 }]);
+const truckLeftSideTexture = new Texture(25,30,[{x: 0, y: 5, w: 10, h: 10 }]);*/
+   
+    //function to create the wheels of cars or trucks -- here I have only implemented trucks.
+    function truckWheel() {
+        const t_wheel = new THREE.Mesh( 
+        new THREE.BoxGeometry( 24, 24, 56), 
+        new THREE.MeshLambertMaterial( { color: 0x333333, flatShading: true } ) 
+        );
+        return t_wheel;
+    }
+    
+     function carWheel() {
+        const c_wheel = new THREE.Mesh( 
+        new THREE.BoxGeometry( 20, 20, 15), 
+        new THREE.MeshLambertMaterial( { color: 0x333333, flatShading: true } ) 
+        );
+        return c_wheel;
+    }
+    
+    
+    
+//function to create a truck    
+function truck(x,z) {
+    trucker = new THREE.Group();
+    const color = vehicleColors[Math.floor(Math.random() * vehicleColors.length)];
+    
+
+    const base = new THREE.Mesh(
+        new THREE.BoxGeometry( 200, 10, 40 ), 
+        new THREE.MeshLambertMaterial( { color: 0xb4c6fc, flatShading: true } )
+    );
+    base.position.z = 20;
+    collidableVehicle.push(base);
+    trucker.add(base);
+
+    const cargo = new THREE.Mesh(
+      new THREE.BoxGeometry( 150, 80, 60 ), 
+      new THREE.MeshPhongMaterial( { color: 0xb4c6fc, flatShading: true } )
+    );
+    
+    cargo.position.set(30,30,20);
+      cargo.castShadow = true;
+    cargo.receiveShadow = true;
+    collidableVehicle.push(cargo);
+    trucker.add(cargo);
+
+    const cabin = new THREE.Mesh(
+      new THREE.BoxGeometry( 50, 60, 50 ), 
+      [
+        new THREE.MeshPhongMaterial( { color, flatShading: true } ), // back
+        new THREE.MeshPhongMaterial( { color, flatShading: true}) ,
+        new THREE.MeshPhongMaterial( { color, flatShading: true } ),
+        new THREE.MeshPhongMaterial( { color, flatShading: true } ),
+        new THREE.MeshPhongMaterial( { color, flatShading: true } ), // top
+        new THREE.MeshPhongMaterial( { color, flatShading: true } ) // bottom
+      ]
+    );
+    cabin.position.set(-80,20,20); 
+    collidableVehicle.push(cabin);
+    trucker.add(cabin);
+    
+    
+    const frontWheel = new truckWheel();
+    frontWheel.position.set(-76,-20,20);
+    collidableVehicle.push(frontWheel);
+    trucker.add(frontWheel);
+  
+    const middleWheel = new truckWheel();
+    middleWheel.position.set(-20,-20,20);
+    collidableVehicle.push(middleWheel);
+    trucker.add(middleWheel);
+
+    const backWheel = new truckWheel();
+    backWheel.position.set(60,-20,20);
+    collidableVehicle.push(backWheel);
+    trucker.add(backWheel);
+    
+    
+    trucker.position.set(x,20,z);
+    //collidableVehicle.push(trucker);
+    
+    scene.add(trucker);
+    
+    
+    return trucker;
+    
+  } 
