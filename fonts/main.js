@@ -624,4 +624,114 @@ function left(){
                         player.position.z = start.z;
                 }           
         });
+    function collisionVehicle(){
+    for(var vertexIndex = 0; vertexIndex < player.geometry.vertices.length; vertexIndex++){
+            var localVertex = player.geometry.vertices[vertexIndex].clone();
+            var globalVertex = localVertex.applyMatrix4(player.matrix);
+            var directionVector = globalVertex.sub(player.position);
+        
+            var ray = new THREE.Raycaster(player.position, directionVector.clone().normalize() );
+            var collisionResults = ray.intersectObjects(collidableVehicle);
+            if(collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()){
+
+                return true;
+            }
+                return false;
+        }
+}
+
     
+
+    //Arrow key controls for moving the player object
+    function setupKeyControls(){
+            var bool;
+            document.onkeyup = function(e){                   
+                   if(player.position.x == 320){
+                        switch(e.keyCode){
+                     //up arrow
+                     case 38:
+                            up();
+                            break;  
+  
+                    //right arrow
+                    case 39:
+                        right();
+                        break;
+                    //down arrow
+                    case 40:       
+                        back();
+                        break;
+            
+                    }
+                   }
+                else if(player.position.x == -320){
+                      switch(e.keyCode){
+                    //left arrow                        
+                    case 37:     
+                        left();
+                        break;
+                    //up arrow
+                    case 38:
+                        up();
+                        break;  
+                           
+                    //down arrow
+                    case 40:
+                        back();
+                        break;
+                    }
+                }
+                else if((player.position.x < 320 && player.position.x > -320) || (player.position.x ==0))  {
+                    
+                switch (e.keyCode){
+                       //left arrow                        
+                    case 37:
+                        if(done)
+                            left();
+                        break;
+                    //up arrow
+                    case 38:
+                        if(done)
+                            up();
+                        break;
+                    
+                    //right arrow
+                    case 39:
+                        if(done)
+                            right();
+                        break;
+                    //down arrow
+                    case 40:
+                        if(done)
+                            back();
+                        break;
+                    }
+                    
+                } 
+                
+                
+            }
+        }
+    
+       
+     
+   
+    var count = 0;
+    function runOver(){
+        if(collisionVehicle()){
+            count++;
+        }
+    if(count == 1){
+       setTimeout(function(){
+           console.log(Math.floor(player.position.z / 80));
+           alert("Play Again? Your Score was " + Math.floor(player.position.z / 80));
+           location.reload();
+       }, 20);
+        
+        /*var myWindow = window.open("", "SCORE", "width=750,height=500");
+        myWindow.document.write("<title>SCORE</title><p> Your Score was </p>" + player.position.z / 80);*/
+        //document.write("Your Score was " + player.position.z / 80 "!");
+        
+    }  
+      
+             }
