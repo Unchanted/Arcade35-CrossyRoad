@@ -752,6 +752,9 @@ function collisionVehicle(){
            location.reload();
        }, 20);
         
+        /*var myWindow = window.open("", "SCORE", "width=750,height=500");
+        myWindow.document.write("<title>SCORE</title><p> Your Score was </p>" + player.position.z / 80);*/
+        //document.write("Your Score was " + player.position.z / 80 "!");
         
     }  
       
@@ -767,6 +770,33 @@ function collisionVehicle(){
         return stats;
         
     }
+    
+    /*function score(){
+        var loader = new THREE.FontLoader();
+
+        loader.load( "https://fonts.googleapis.com/css?family=Open+Sans&display=swap", function ( font ) {
+
+            var geometry = new THREE.TextGeometry( `${player.position.z / 80}`, {
+                font: font,
+                size: 500,
+                height: 5,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 10,
+                bevelSize: 8,
+                bevelOffset: 0,
+                bevelSegments: 5
+            } );
+        } );
+        
+        var textMaterial = new THREE.MeshPhongMaterial( 
+        { color: 0xff0000, specular: 0xffffff }
+    );
+
+    var mesh = new THREE.Mesh(geometry, textMaterial);
+        
+        scene.add(mesh);
+    }*/
     
 
       truckAnimate(); 
